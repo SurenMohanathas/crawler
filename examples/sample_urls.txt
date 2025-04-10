@@ -1,0 +1,14 @@
+# Yelp Restaurant URLs
+https://www.yelp.com/biz/lazy-bear-san-francisco
+https://www.yelp.com/biz/state-bird-provisions-san-francisco
+https://www.yelp.com/biz/frances-san-francisco
+
+# Google Maps Restaurant URLs
+https://www.google.com/maps/place/Acquerello/@37.7931086,-122.4235186,17z/
+https://www.google.com/maps/place/Benu/@37.785394,-122.3996045,17z/
+https://www.google.com/maps/place/Quince/@37.7975444,-122.4055026,17z/
+
+# TripAdvisor Restaurant URLs
+https://www.tripadvisor.com/Restaurant_Review-g60713-d365471-Reviews-Kokkari_Estiatorio-San_Francisco_California.html
+https://www.tripadvisor.com/Restaurant_Review-g60713-d1075128-Reviews-Brenda_s_French_Soul_Food-San_Francisco_California.html
+https://www.tripadvisor.com/Restaurant_Review-g60713-d349453-Reviews-The_House-San_Francisco_California.html
