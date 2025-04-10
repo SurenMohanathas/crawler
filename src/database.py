@@ -7,14 +7,22 @@ from sqlalchemy.orm import sessionmaker, relationship
 # Load environment variables
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config', '.env'))
 
-# Database connection
-DB_HOST = os.getenv('DB_HOST', 'localhost')
-DB_PORT = os.getenv('DB_PORT', '5432')
-DB_NAME = os.getenv('DB_NAME', 'restaurant_reviews')
-DB_USER = os.getenv('DB_USER', 'postgres')
-DB_PASSWORD = os.getenv('DB_PASSWORD', 'postgres')
+# Check if we should use SQLite for testing/demo mode
+USE_SQLITE = os.getenv('USE_SQLITE', 'false').lower() == 'true'
 
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+if USE_SQLITE:
+    # Use SQLite for testing/demo
+    DATABASE_URL = "sqlite:///restaurant_reviews.db"
+    print("Using SQLite database for testing/demo mode")
+else:
+    # Database connection for PostgreSQL
+    DB_HOST = os.getenv('DB_HOST', 'localhost')
+    DB_PORT = os.getenv('DB_PORT', '5432')
+    DB_NAME = os.getenv('DB_NAME', 'restaurant_reviews')
+    DB_USER = os.getenv('DB_USER', 'postgres')
+    DB_PASSWORD = os.getenv('DB_PASSWORD', 'postgres')
+    
+    DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # Create SQLAlchemy engine and session
 engine = create_engine(DATABASE_URL)

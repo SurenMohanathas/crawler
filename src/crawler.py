@@ -1,7 +1,7 @@
 import os
 import time
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from abc import ABC, abstractmethod
 
@@ -44,6 +44,26 @@ class BaseCrawler(ABC):
     
     def fetch_page(self, url: str) -> Optional[BeautifulSoup]:
         """Fetch a page and return BeautifulSoup object"""
+        # Check for demo mode
+        if os.getenv('DEMO_MODE', 'false').lower() == 'true':
+            # Return mock data for demonstration purposes
+            logger.info(f"DEMO MODE: Using mock data instead of fetching {url}")
+            if 'yelp.com' in url:
+                with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tests/fixtures/yelp_restaurant.html'), 'r') as f:
+                    return BeautifulSoup(f.read(), 'html.parser')
+            elif 'google.com/maps' in url:
+                # Return minimal mock data for Google
+                mock_html = "<html><body><h1>Mock Restaurant</h1><div class='fontDisplayLarge'>4.5</div></body></html>"
+                return BeautifulSoup(mock_html, 'html.parser')
+            elif 'tripadvisor.com' in url:
+                # Return minimal mock data for TripAdvisor
+                mock_html = "<html><body><h1 class='HjBfq'>Mock Restaurant</h1><span class='ZDEqb'>4.5 of 5 bubbles</span></body></html>"
+                return BeautifulSoup(mock_html, 'html.parser')
+            else:
+                mock_html = "<html><body><h1>Generic Restaurant</h1></body></html>"
+                return BeautifulSoup(mock_html, 'html.parser')
+        
+        # Real fetching logic
         try:
             response = self.session.get(url, timeout=30)
             response.raise_for_status()
@@ -190,6 +210,30 @@ class YelpCrawler(BaseCrawler):
     
     def crawl_reviews(self, url: str, restaurant_id: int) -> List[Dict[str, Any]]:
         """Crawl Yelp reviews for a restaurant"""
+        # Check for demo mode
+        if os.getenv('DEMO_MODE', 'false').lower() == 'true':
+            logger.info(f"DEMO MODE: Using mock reviews data for {url}")
+            
+            # Create mock reviews
+            mock_reviews = []
+            for i in range(5):
+                review_date = datetime.now() - timedelta(days=i*15)
+                mock_reviews.append({
+                    'rating': 4.5 if i % 2 == 0 else 3.5,
+                    'review_text': f"This is a mock review #{i+1} for demonstration purposes. The food was {'excellent' if i % 2 == 0 else 'good'}.",
+                    'review_date': review_date,
+                    'reviewer_name': f"User{i+1}",
+                    'reviewer_id': f"user{i+1}",
+                    'helpful_count': i,
+                    'source_url': url,
+                    'source_id': f"yelp_{restaurant_id}_user{i+1}_{int(review_date.timestamp())}",
+                    'source_platform': 'yelp',
+                    'crawl_date': datetime.now()
+                })
+            
+            return mock_reviews
+        
+        # Regular flow
         # Yelp reviews URL format
         reviews_url = f"{url}?sort_by=date_desc"
         soup = self.fetch_page(reviews_url)
@@ -329,6 +373,29 @@ class GoogleMapsCrawler(BaseCrawler):
     
     def crawl_reviews(self, url: str, restaurant_id: int) -> List[Dict[str, Any]]:
         """Crawl Google Maps reviews for a restaurant"""
+        # Check for demo mode
+        if os.getenv('DEMO_MODE', 'false').lower() == 'true':
+            logger.info(f"DEMO MODE: Using mock reviews data for {url}")
+            
+            # Create mock reviews
+            mock_reviews = []
+            for i in range(4):
+                review_date = datetime.now() - timedelta(days=i*10)
+                mock_reviews.append({
+                    'rating': 5.0 if i % 3 == 0 else (4.0 if i % 3 == 1 else 3.0),
+                    'review_text': f"Mock Google review #{i+1}. {'The service was excellent and the food was delicious.' if i % 3 == 0 else ('Good experience overall but the prices are high.' if i % 3 == 1 else 'Average experience, might try somewhere else next time.')}",
+                    'review_date': review_date,
+                    'reviewer_name': f"Google User {i+1}",
+                    'reviewer_id': f"guser{i+1}",
+                    'helpful_count': i * 2,
+                    'source_url': url,
+                    'source_id': f"google_{restaurant_id}_guser{i+1}_{int(review_date.timestamp())}",
+                    'source_platform': 'google',
+                    'crawl_date': datetime.now()
+                })
+            
+            return mock_reviews
+            
         # Google Maps reviews are loaded dynamically, this is a simplified implementation
         # For a real application, you might need to use Selenium to interact with the page
         
@@ -463,6 +530,29 @@ class TripAdvisorCrawler(BaseCrawler):
     
     def crawl_reviews(self, url: str, restaurant_id: int) -> List[Dict[str, Any]]:
         """Crawl TripAdvisor reviews for a restaurant"""
+        # Check for demo mode
+        if os.getenv('DEMO_MODE', 'false').lower() == 'true':
+            logger.info(f"DEMO MODE: Using mock reviews data for {url}")
+            
+            # Create mock reviews
+            mock_reviews = []
+            for i in range(3):
+                review_date = datetime.now() - timedelta(days=i*20)
+                mock_reviews.append({
+                    'rating': 5.0 if i == 0 else (3.0 if i == 1 else 4.0),
+                    'review_text': f"Mock TripAdvisor review #{i+1}. {'Amazing restaurant with outstanding Greek food!' if i == 0 else ('The atmosphere was nice but service was slow.' if i == 1 else 'Good value for money, would recommend to friends.')}",
+                    'review_date': review_date,
+                    'reviewer_name': f"TripAdvisor User {i+1}",
+                    'reviewer_id': f"tauser{i+1}",
+                    'helpful_count': i * 3,
+                    'source_url': url,
+                    'source_id': f"tripadvisor_{restaurant_id}_tauser{i+1}_{int(review_date.timestamp())}",
+                    'source_platform': 'tripadvisor',
+                    'crawl_date': datetime.now()
+                })
+            
+            return mock_reviews
+        
         # TripAdvisor reviews URL format
         reviews_url = f"{url.split('Reviews-')[0]}Reviews-or10-{url.split('Reviews-')[1]}"
         soup = self.fetch_page(reviews_url)
